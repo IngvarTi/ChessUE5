@@ -121,3 +121,8 @@ void AChessPiece::setIsWhite(bool isWhite)
 	mIsWhite = isWhite;
 	setMaterial(!isWhite);
 }
+
+EPieces AChessPiece::getPieceType()
+{
+	return mPieceType;
+}

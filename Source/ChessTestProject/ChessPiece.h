@@ -50,6 +50,8 @@ public:
 	int GetMovementValue() const;
 	bool IsWhite()const;
 	void setIsWhite(bool isWhite);
+	EPieces getPieceType();
+
 private:
 	void loadMaterials();
 

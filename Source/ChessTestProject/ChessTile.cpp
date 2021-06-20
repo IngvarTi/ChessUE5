@@ -20,6 +20,21 @@ FRotator ChessTile::GetGlobalRotation() const
     return mTile->GetComponentRotation();
 }
 
+int32 ChessTile::GetRow()
+{
+    return mRow;
+}
+
+int32 ChessTile::GetColum()
+{
+    return mColum;
+}
+
+bool ChessTile::IsBlack()
+{
+    return isBlack;
+}
+
 
 bool ChessTile::isSameTile(UStaticMeshComponent * tile)
 {
