@@ -34,6 +34,14 @@ void AChessPiece::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+}
+
+// Called when the game starts or when spawned
+void AChessPiece::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Set Mesh
 	if (mPieceMesh)
 	{
 		if (auto modelComponent = getMeshRoot())
@@ -42,12 +50,6 @@ void AChessPiece::OnConstruction(const FTransform& Transform)
 			modelComponent->SetRenderCustomDepth(false);
 		}
 	}
-}
-
-// Called when the game starts or when spawned
-void AChessPiece::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 // Called every frame
