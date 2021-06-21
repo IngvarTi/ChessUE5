@@ -365,14 +365,22 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
         case EPieces::PE_KNIGHT:
 		{
 			{
+                AChessPiece* OtherPiece = mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece;
 				if ((2 == abs(FutureRow - CurentRow)) && (1 == abs(FutureColum - CurentColum)))
 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                    
+                    if (!OtherPiece || OtherPiece->IsWhite() != piece->IsWhite())
+                    {
+                        mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                    }
 				}
 
 				else if ((1 == abs(FutureRow - CurentRow)) && (2 == abs(FutureColum - CurentColum)))
 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                    if (!OtherPiece || OtherPiece->IsWhite() != piece->IsWhite())
+                    {
+                        mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                    }
 				}
 			}
 		}
