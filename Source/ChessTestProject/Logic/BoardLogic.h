@@ -63,9 +63,11 @@ public:
 
     bool isRightColor(AChessPiece * piece, bool isWhite);
     void HighlingPossiblePlacement(AChessPiece * piece);
+    TileInformations GetTileInfos();
 
     //test
     TArray<AChessPiece*> GetChessPieces();
+
 
 private:
     void CreateTiles();

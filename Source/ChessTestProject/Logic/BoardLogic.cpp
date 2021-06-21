@@ -154,8 +154,8 @@ bool BoardLogic::MovePiece(AChessPiece* piece, ChessTile * tileDestination)
     {
         auto weightedDestination = mCurrentSelectionPathfinding->GetWeightedTileFromTile(tileDestination);
         const int MAX_MOVEMENT = piece->GetMovementValue();
-        if (weightedDestination->GetWeight() <= MAX_MOVEMENT)
-        {
+//         if (weightedDestination->GetWeight() <= MAX_MOVEMENT)
+//         {
             oldTile->piece = nullptr;
             newTile->piece = piece;
 
@@ -163,7 +163,7 @@ bool BoardLogic::MovePiece(AChessPiece* piece, ChessTile * tileDestination)
             mCurrentSelectionPathfinding.reset(nullptr);
             HideAllSelectors();
             isValidMove = true;
-        }
+//        }
     }
 
     return isValidMove;
@@ -545,6 +545,11 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
     mCurrentSelectionPathfinding = std::make_unique<WeightedTiles>(std::move(weightedTiles));
 }
 
+TileInformations BoardLogic::GetTileInfos()
+{
+    return mTileInfos;
+}
+
 TArray<AChessPiece*> BoardLogic::GetChessPieces()
 {
     return mPieces;
@@ -687,7 +692,7 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 
 			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
 			{
@@ -705,7 +710,7 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 
 			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
 			{
@@ -723,7 +728,7 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 
 			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
 			{
@@ -741,7 +746,7 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 
 			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
 			{

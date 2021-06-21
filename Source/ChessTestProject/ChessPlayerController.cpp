@@ -60,7 +60,16 @@ void AChessPlayerController::ProcessMouseClick()
 
 			if (auto chessMode = Cast<AChessTestProjectGameModeBase>(GetWorld()->GetAuthGameMode()))
 			{
-				chessMode->ShowPiecePossibleMovement(mSelectedPiece);
+				if (ActorCatched)
+				{
+					chessMode->playTurnGetPiese(ActorCatched, mSelectedPiece);
+					ActorCatched = false;
+				}
+				else
+				{
+					chessMode->ShowPiecePossibleMovement(mSelectedPiece);
+					ActorCatched = mSelectedPiece;
+				}
 			}
 
 			UE_LOG(LogTemp, Warning, TEXT("Selected : %s"), *chessPiece->GetName());

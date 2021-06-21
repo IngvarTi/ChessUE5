@@ -100,6 +100,31 @@ bool AChessTestProjectGameModeBase::playTurn(AChessPiece* piece, UStaticMeshComp
 	return isMoveValid;
 }
 
+bool AChessTestProjectGameModeBase::playTurnGetPiese(AChessPiece* piece, AChessPiece* gettedPiece)
+{
+	bool isMoveValid = false;
+	if (piece->IsWhite() == mIsWhiteTurn)
+	{
+		if (auto tile = mBoardLogic->GetTileInfos().GetTileInfoFromPiece(gettedPiece)->tile)
+		{
+			isMoveValid = mBoardLogic->MovePiece(piece, tile);
+			if (isMoveValid)
+			{
+				mIsWhiteTurn = !mIsWhiteTurn;
+				FTimerDelegate timedDelegate = FTimerDelegate::CreateLambda([=]()
+					{
+						this->LookAtSide();
+					});
+
+				FTimerHandle switchCameraTimer;
+				GetWorldTimerManager().SetTimer(switchCameraTimer, timedDelegate, .3f, false);
+			}
+			gettedPiece->Destroy();
+		}
+	}
+	return isMoveValid;
+}
+
 void AChessTestProjectGameModeBase::ShowPiecePossibleMovement(AChessPiece* piece)
 {
 	mBoardLogic->HighlingPossiblePlacement(piece);

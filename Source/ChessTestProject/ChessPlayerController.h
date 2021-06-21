@@ -24,4 +24,6 @@ private:
 	void ProcessMouseClick();
 
 	AChessPiece* mSelectedPiece = nullptr;
+
+	AChessPiece* ActorCatched = nullptr;
 };

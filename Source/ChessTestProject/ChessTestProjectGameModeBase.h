@@ -27,6 +27,7 @@ public:
 
 	// returns false if the move was invalid
 	bool playTurn(AChessPiece* piece, UStaticMeshComponent* destination);
+	bool playTurnGetPiese(AChessPiece* piece, AChessPiece* gettedPiece);
 	UFUNCTION(BlueprintCallable)
 	void ShowPiecePossibleMovement(AChessPiece* piece);
 	bool IsWhiteTurn() const;
