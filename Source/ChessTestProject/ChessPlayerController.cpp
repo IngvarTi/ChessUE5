@@ -3,7 +3,7 @@
 
 #include "ChessPlayerController.h"
 #include "ChessTestProjectGameModeBase.h"
-#include "ChessBoard.h"
+#include "ChessTestProject/Actors/ChessBoard.h"
 #include "Kismet/GameplayStatics.h"
 
 void AChessPlayerController::BeginPlay()

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "ChessPiece.h"
+#include "Actors/ChessPiece.h"
 #include "ChessPlayerController.generated.h"
 
 /**

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ChessPiece.h"
+#include "ChessTestProject/Actors/ChessPiece.h"
 #include "ChessTile.h"
 
 struct TileInformation

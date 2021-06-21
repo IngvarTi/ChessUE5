@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "ChessBoard.h"
-#include "ChessPiece.h"
+#include "ChessTestProject/Actors/ChessBoard.h"
+#include "ChessTestProject/Actors/ChessPiece.h"
 #include "ChessTile.h"
 
 #include "TileInformations.h"

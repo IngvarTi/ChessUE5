@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "BoardLogic.h"
+#include "Logic/BoardLogic.h"
 #include "ChessTestProjectGameModeBase.generated.h"
 
 /**

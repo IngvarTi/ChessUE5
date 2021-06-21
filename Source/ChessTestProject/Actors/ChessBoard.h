@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChessPiece.h"
-#include "ChessTile.h"
-#include "BoardLogic.h"
+#include "ChessTestProject/Logic/ChessTile.h"
+#include "ChessTestProject/Logic/BoardLogic.h"
 #include "GameFramework/SpringArmComponent.h"
 
 #include "ChessBoard.generated.h"

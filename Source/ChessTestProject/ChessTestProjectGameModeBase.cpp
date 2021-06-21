@@ -2,7 +2,7 @@
 
 
 #include "ChessTestProjectGameModeBase.h"
-#include "ChessBoard.h"
+#include "ChessTestProject/Actors/ChessBoard.h"
 #include "Kismet/GameplayStatics.h"
 
 
