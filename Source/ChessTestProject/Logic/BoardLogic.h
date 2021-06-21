@@ -51,6 +51,7 @@ class CHESSTESTPROJECT_API BoardLogic
     TArray<ChessTile> mTiles;
     TileInformations mTileInfos;
     std::unique_ptr<WeightedTiles> mCurrentSelectionPathfinding;
+    TArray<AChessPiece*> piecesAvailableForCapture;
 
 public:
     BoardLogic() = default;
@@ -65,7 +66,6 @@ public:
     void HighlingPossiblePlacement(AChessPiece * piece);
     TileInformations GetTileInfos();
 
-    //test
     TArray<AChessPiece*> GetChessPieces();
 
 
