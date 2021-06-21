@@ -345,10 +345,11 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 			if ((FutureRow == CurentRow) && (FutureColum != CurentColum))
 			{
 				// TODO Check if there are no pieces on the way
-//  				if (isPathFree(presentTile, finishingTile, Direction::HORIZONTAL))
-//  				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				}
+//   				if (isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, Direction::HORIZONTAL))
+//   				{
+                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//				    }
 			}
 			// Vertical move
 			else if ((FutureRow != CurentRow) && (FutureColum == CurentColum))
@@ -356,7 +357,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::VERTICAL))
 // 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
             break;
@@ -382,7 +384,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::DIAGONAL))
 // 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
             break;
@@ -393,7 +396,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::HORIZONTAL))
 // 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
 			// Vertical move
@@ -402,7 +406,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::VERTICAL))
 // 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
 
@@ -412,7 +417,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::DIAGONAL))
 // 				{
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
             break;
@@ -545,165 +551,182 @@ void BoardLogic::HideAllSelectors()
 }
 
 //bool BoardLogic::isPathFree(Position startingPos, Position finishingPos, int iDirection)
-bool BoardLogic::isPathFree(ChessTile* startingPos, ChessTile* finishingPos, Direction /*int32*/ iDirection)
+bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow, int32 FutureColum/*, Direction / *int32* / iDirection*/)
 {
-// 	bool bFree = false;
-// 
+	//bool bFree = false;
+    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+
 // 	switch (iDirection)
 // 	{
 // 	case Direction::HORIZONTAL:
 // 	{
-// 		// If it is a horizontal move, we can assume the startingPos.iRow == finishingPos.iRow
-// 		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
-// 		if (startingPos.iColumn == finishingPos.iColumn)
-// 		{
-// 			cout << "Error. Movement is horizontal but column is the same\n";
-// 		}
-// 
-// 		// Moving to the right
-// 		else if (startingPos.iColumn < finishingPos.iColumn)
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = startingPos.iColumn + 1; i < finishingPos.iColumn; i++)
-// 			{
-// 				if (isSquareOccupied(startingPos.iRow, i))
-// 				{
+		// If it is a horizontal move, we can assume the CurentRow == FutureRow
+		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
+		if (CurentColum == FutureColum)
+		{
+//			cout << "Error. Movement is horizontal but column is the same\n";
+		}
+
+		// Moving to the right
+		else if (CurentColum < FutureColum)
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = CurentColum + 1; i < FutureColum; i++)
+			{
+				if (mTileInfos.GetTileInfo(CurentRow, i)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Horizontal path to the right is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 
-// 		// Moving to the left
-// 		else //if (startingPos.iColumn > finishingPos.iColumn)
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = startingPos.iColumn - 1; i > finishingPos.iColumn; i--)
-// 			{
-// 				if (isSquareOccupied(startingPos.iRow, i))
-// 				{
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+
+		// Moving to the left
+		else //if (CurentColum > FutureColum)
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = CurentColum - 1; i > FutureColum; i--)
+			{
+				if (mTileInfos.GetTileInfo(CurentRow, i)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Horizontal path to the left is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 	}
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+//	}
 // 	break;
 // 
 // 	case Direction::VERTICAL:
 // 	{
-// 		// If it is a vertical move, we can assume the startingPos.iColumn == finishingPos.iColumn
-// 		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
-// 		if (startingPos.iRow == finishingPos.iRow)
-// 		{
+		// If it is a vertical move, we can assume the CurentColum == FutureColum
+		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
+		if (CurentRow == FutureRow)
+		{
 // 			cout << "Error. Movement is vertical but row is the same\n";
 // 			throw("Error. Movement is vertical but row is the same");
-// 		}
-// 
-// 		// Moving up
-// 		else if (startingPos.iRow < finishingPos.iRow)
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = startingPos.iRow + 1; i < finishingPos.iRow; i++)
-// 			{
-// 				if (isSquareOccupied(i, startingPos.iColumn))
-// 				{
+		}
+
+		// Moving up
+		else if (CurentRow < FutureRow)
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = CurentRow + 1; i < FutureRow; i++)
+			{
+				if (mTileInfos.GetTileInfo(i, CurentColum)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Vertical path up is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 
-// 		// Moving down
-// 		else //if (startingPos.iColumn > finishingPos.iRow)
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = startingPos.iRow - 1; i > finishingPos.iRow; i--)
-// 			{
-// 				if (isSquareOccupied(i, startingPos.iColumn))
-// 				{
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+
+		// Moving down
+		else //if (CurentColum > FutureRow)
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = CurentRow - 1; i > FutureRow; i--)
+			{
+				if (mTileInfos.GetTileInfo(i, CurentColum)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Vertical path down is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 	}
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+//	}
 // 	break;
 // 
 // 	case Direction::DIAGONAL:
 // 	{
-// 		// Moving up and right
-// 		if ((finishingPos.iRow > startingPos.iRow) && (finishingPos.iColumn > startingPos.iColumn))
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
-// 			{
-// 				if (isSquareOccupied(startingPos.iRow + i, startingPos.iColumn + i))
-// 				{
+		// Moving up and right
+		if ((FutureRow > CurentRow) && (FutureColum > CurentColum))
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+			{
+				if (mTileInfos.GetTileInfo(CurentRow + i, CurentColum + i)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Diagonal path up-right is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 
-// 		// Moving up and left
-// 		else if ((finishingPos.iRow > startingPos.iRow) && (finishingPos.iColumn < startingPos.iColumn))
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
-// 			{
-// 				if (isSquareOccupied(startingPos.iRow + i, startingPos.iColumn - i))
-// 				{
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+
+		// Moving up and left
+		else if ((FutureRow > CurentRow) && (FutureColum < CurentColum))
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+			{
+				if (mTileInfos.GetTileInfo(CurentRow + i, CurentColum - i)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Diagonal path up-left is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 
-// 		// Moving down and right
-// 		else if ((finishingPos.iRow < startingPos.iRow) && (finishingPos.iColumn > startingPos.iColumn))
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
-// 			{
-// 				if (isSquareOccupied(startingPos.iRow - i, startingPos.iColumn + i))
-// 				{
-// 					bFree = false;
-// 					cout << "Diagonal path down-right is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 
-// 		// Moving down and left
-// 		else if ((finishingPos.iRow < startingPos.iRow) && (finishingPos.iColumn < startingPos.iColumn))
-// 		{
-// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-// 			bFree = true;
-// 
-// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
-// 			{
-// 				if (isSquareOccupied(startingPos.iRow - i, startingPos.iColumn - i))
-// 				{
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+
+		// Moving down and right
+		else if ((FutureRow < CurentRow) && (FutureColum > CurentColum))
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+			{
+				if (mTileInfos.GetTileInfo(CurentRow - i, CurentColum + i)->piece)
+				{
+					//bFree = false;
+					//cout << "Diagonal path down-right is not clear!\n";
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+
+		// Moving down and left
+		else if ((FutureRow < CurentRow) && (FutureColum < CurentColum))
+		{
+			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+			//bFree = true;
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+
+			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+			{
+				if (mTileInfos.GetTileInfo(CurentRow - i, CurentColum - i)->piece)
+				{
 // 					bFree = false;
 // 					cout << "Diagonal path down-left is not clear!\n";
-// 				}
-// 			}
-// 		}
-// 
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+				}
+			}
+		}
+
 // 		else
 // 		{
 // 			throw("Error. Diagonal move not allowed");
@@ -711,7 +734,7 @@ bool BoardLogic::isPathFree(ChessTile* startingPos, ChessTile* finishingPos, Dir
 // 	}
 // 	break;
 // 	}
-// 
-// 	return bFree;
-return false;
+
+//	return bFree;
+return true;
 }

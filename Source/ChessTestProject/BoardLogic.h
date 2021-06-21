@@ -71,5 +71,5 @@ private:
     void CreateTiles();
     void PlacePieces();
     void HideAllSelectors();
-    bool isPathFree(ChessTile* startingPos, ChessTile* finishingPos, Direction /*int32*/ iDirection);
+    bool isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow, int32 FutureColum/*, Direction / *int32* / iDirection*/);
 };
