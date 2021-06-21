@@ -345,8 +345,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 			if ((FutureRow == CurentRow) && (FutureColum != CurentColum))
 			{
 				// TODO Check if there are no pieces on the way
-// 				if (current_game->isPathFree(present, future, Chess::HORIZONTAL))
-// 				{
+//  				if (isPathFree(presentTile, finishingTile, Direction::HORIZONTAL))
+//  				{
                     mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
@@ -542,4 +542,176 @@ void BoardLogic::HideAllSelectors()
     {
         tile.SetSelectorVisibility(false);
     }
+}
+
+//bool BoardLogic::isPathFree(Position startingPos, Position finishingPos, int iDirection)
+bool BoardLogic::isPathFree(ChessTile* startingPos, ChessTile* finishingPos, Direction /*int32*/ iDirection)
+{
+// 	bool bFree = false;
+// 
+// 	switch (iDirection)
+// 	{
+// 	case Direction::HORIZONTAL:
+// 	{
+// 		// If it is a horizontal move, we can assume the startingPos.iRow == finishingPos.iRow
+// 		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
+// 		if (startingPos.iColumn == finishingPos.iColumn)
+// 		{
+// 			cout << "Error. Movement is horizontal but column is the same\n";
+// 		}
+// 
+// 		// Moving to the right
+// 		else if (startingPos.iColumn < finishingPos.iColumn)
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = startingPos.iColumn + 1; i < finishingPos.iColumn; i++)
+// 			{
+// 				if (isSquareOccupied(startingPos.iRow, i))
+// 				{
+// 					bFree = false;
+// 					cout << "Horizontal path to the right is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 
+// 		// Moving to the left
+// 		else //if (startingPos.iColumn > finishingPos.iColumn)
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = startingPos.iColumn - 1; i > finishingPos.iColumn; i--)
+// 			{
+// 				if (isSquareOccupied(startingPos.iRow, i))
+// 				{
+// 					bFree = false;
+// 					cout << "Horizontal path to the left is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 	}
+// 	break;
+// 
+// 	case Direction::VERTICAL:
+// 	{
+// 		// If it is a vertical move, we can assume the startingPos.iColumn == finishingPos.iColumn
+// 		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
+// 		if (startingPos.iRow == finishingPos.iRow)
+// 		{
+// 			cout << "Error. Movement is vertical but row is the same\n";
+// 			throw("Error. Movement is vertical but row is the same");
+// 		}
+// 
+// 		// Moving up
+// 		else if (startingPos.iRow < finishingPos.iRow)
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = startingPos.iRow + 1; i < finishingPos.iRow; i++)
+// 			{
+// 				if (isSquareOccupied(i, startingPos.iColumn))
+// 				{
+// 					bFree = false;
+// 					cout << "Vertical path up is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 
+// 		// Moving down
+// 		else //if (startingPos.iColumn > finishingPos.iRow)
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = startingPos.iRow - 1; i > finishingPos.iRow; i--)
+// 			{
+// 				if (isSquareOccupied(i, startingPos.iColumn))
+// 				{
+// 					bFree = false;
+// 					cout << "Vertical path down is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 	}
+// 	break;
+// 
+// 	case Direction::DIAGONAL:
+// 	{
+// 		// Moving up and right
+// 		if ((finishingPos.iRow > startingPos.iRow) && (finishingPos.iColumn > startingPos.iColumn))
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
+// 			{
+// 				if (isSquareOccupied(startingPos.iRow + i, startingPos.iColumn + i))
+// 				{
+// 					bFree = false;
+// 					cout << "Diagonal path up-right is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 
+// 		// Moving up and left
+// 		else if ((finishingPos.iRow > startingPos.iRow) && (finishingPos.iColumn < startingPos.iColumn))
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
+// 			{
+// 				if (isSquareOccupied(startingPos.iRow + i, startingPos.iColumn - i))
+// 				{
+// 					bFree = false;
+// 					cout << "Diagonal path up-left is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 
+// 		// Moving down and right
+// 		else if ((finishingPos.iRow < startingPos.iRow) && (finishingPos.iColumn > startingPos.iColumn))
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
+// 			{
+// 				if (isSquareOccupied(startingPos.iRow - i, startingPos.iColumn + i))
+// 				{
+// 					bFree = false;
+// 					cout << "Diagonal path down-right is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 
+// 		// Moving down and left
+// 		else if ((finishingPos.iRow < startingPos.iRow) && (finishingPos.iColumn < startingPos.iColumn))
+// 		{
+// 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
+// 			bFree = true;
+// 
+// 			for (int i = 1; i < abs(finishingPos.iRow - startingPos.iRow); i++)
+// 			{
+// 				if (isSquareOccupied(startingPos.iRow - i, startingPos.iColumn - i))
+// 				{
+// 					bFree = false;
+// 					cout << "Diagonal path down-left is not clear!\n";
+// 				}
+// 			}
+// 		}
+// 
+// 		else
+// 		{
+// 			throw("Error. Diagonal move not allowed");
+// 		}
+// 	}
+// 	break;
+// 	}
+// 
+// 	return bFree;
+return false;
 }

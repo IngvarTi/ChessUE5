@@ -13,6 +13,14 @@
 
 class AChessBoard;
 
+enum Direction
+{
+	HORIZONTAL = 0,
+	VERTICAL,
+	DIAGONAL,
+	L_SHAPE
+};
+
 class CHESSTESTPROJECT_API ChessMove
 {
     AChessPiece * mPiece;
@@ -63,4 +71,5 @@ private:
     void CreateTiles();
     void PlacePieces();
     void HideAllSelectors();
+    bool isPathFree(ChessTile* startingPos, ChessTile* finishingPos, Direction /*int32*/ iDirection);
 };
