@@ -347,7 +347,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 //   				if (isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, Direction::HORIZONTAL))
 //   				{
-                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
 //                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				    }
 			}
@@ -357,7 +357,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::VERTICAL))
 // 				{
-                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
 //                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
@@ -392,7 +392,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::DIAGONAL))
 // 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
 //                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
@@ -404,7 +404,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::HORIZONTAL))
 // 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
 //                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
@@ -414,7 +414,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::VERTICAL))
 // 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
 //                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
@@ -425,7 +425,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 				// TODO Check if there are no pieces on the way
 // 				if (current_game->isPathFree(present, future, Chess::DIAGONAL))
 // 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum);
+                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
 //                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
 //				}
 			}
@@ -559,10 +559,17 @@ void BoardLogic::HideAllSelectors()
 }
 
 //bool BoardLogic::isPathFree(Position startingPos, Position finishingPos, int iDirection)
-bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow, int32 FutureColum/*, Direction / *int32* / iDirection*/)
+bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow, int32 FutureColum, bool isWhitePiece)
 {
 	//bool bFree = false;
     mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+
+	AChessPiece* OtherPiece = mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece;
+
+	if (!OtherPiece || OtherPiece->IsWhite() != isWhitePiece)
+    {
+		mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+	}
 
 // 	switch (iDirection)
 // 	{
@@ -580,7 +587,10 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//             if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
+//             {
+//                 mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+//             }
 
 			for (int i = CurentColum + 1; i < FutureColum; i++)
 			{
@@ -598,7 +608,10 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+// 			if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
+// 			{
+// 				mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+// 			}
 
 			for (int i = CurentColum - 1; i > FutureColum; i--)
 			{
@@ -628,7 +641,10 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+// 			if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
+// 			{
+// 				mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+// 			}
 
 			for (int i = CurentRow + 1; i < FutureRow; i++)
 			{
@@ -646,7 +662,10 @@ bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow,
 		{
 			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
 			//bFree = true;
-            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+// 			if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
+// 			{
+// 				mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+// 			}
 
 			for (int i = CurentRow - 1; i > FutureRow; i--)
 			{
