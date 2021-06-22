@@ -62,8 +62,16 @@ void AChessPlayerController::ProcessMouseClick()
 			{
 				if (ActorCatched)
 				{
-					chessMode->playTurnGetPiese(ActorCatched, mSelectedPiece);
-					ActorCatched = false;
+					if (ActorCatched->IsWhite() != mSelectedPiece->IsWhite())
+					{
+						chessMode->playTurnGetPiese(ActorCatched, mSelectedPiece);
+						ActorCatched = false;
+					}
+					else
+					{
+						chessMode->ShowPiecePossibleMovement(mSelectedPiece);
+						ActorCatched = mSelectedPiece;
+					}
 				}
 				else
 				{
