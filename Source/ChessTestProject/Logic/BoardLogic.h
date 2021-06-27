@@ -12,6 +12,9 @@
 #include <memory>
 
 class AChessBoard;
+//class AChessPiece;
+
+
 
 enum Direction
 {
@@ -39,6 +42,18 @@ public:
         - pieces
  */
 
+//USTRUCT()
+struct FMove
+{
+//	GENERATED_USTRUCT_BODY()
+
+	AChessPiece* Pieces;
+	int32 FromRow;
+	int32 FromColumn;
+	int32 ToRow;
+	int32 ToColumn;
+};
+
 class CHESSTESTPROJECT_API BoardLogic
 {
     AChessBoard* mBoardActor;       // non-owning ptr
@@ -47,6 +62,7 @@ class CHESSTESTPROJECT_API BoardLogic
     TArray<AChessPiece*> mPieces;  // the owner of the all the pieces
     TArray<AChessPiece*> mWhitePieces;
     TArray<AChessPiece*> mBlackPieces;
+    AChessPiece* mPiecesPosition [8][8]; // mPiecesPosition[Row][Colum]
 
     TArray<ChessTile> mTiles;
     TileInformations mTileInfos;
@@ -64,14 +80,29 @@ public:
 
     bool isRightColor(AChessPiece * piece, bool isWhite);
     void HighlingPossiblePlacement(AChessPiece * piece);
+
+    bool isSimpleMove(int32 FutureRow, int32 FutureColum, AChessPiece* piece);
+
+
     TileInformations GetTileInfos();
 
     TArray<AChessPiece*> GetChessPieces();
 
+	void SetLastMove(FMove Move);
+	FMove GetLastMove();
+
 
 private:
+    TArray<FMove> AllMoves;
+    TArray<AChessPiece*> CapturedPiece;
+    bool enPassantMove;
+
     void CreateTiles();
     void PlacePieces();
     void HideAllSelectors();
-    bool isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow, int32 FutureColum, bool isWhitePiece);
+    bool isPathFree(int32 CurentRow, int32 CurentColum, bool isWhitePiece, Direction MoveDirection);
+
+    bool CheckPath(int32 Row, int32 Colum, bool isWhitePiece);
+
+
 };

@@ -14,6 +14,7 @@ BoardLogic::BoardLogic(AChessBoard* board, UWorld* world)
 {
     CreateTiles();
     PlacePieces();
+    enPassantMove = false;
 }
 
 void BoardLogic::CreateTiles()
@@ -149,6 +150,7 @@ bool BoardLogic::MovePiece(AChessPiece* piece, ChessTile * tileDestination)
     bool isValidMove = false;
     auto oldTile = mTileInfos.GetTileInfoFromPiece(piece);
     auto newTile = mTileInfos.GetTileInfoFromTile(tileDestination);
+    
 
     if (mCurrentSelectionPathfinding)
     {
@@ -156,10 +158,43 @@ bool BoardLogic::MovePiece(AChessPiece* piece, ChessTile * tileDestination)
         const int MAX_MOVEMENT = piece->GetMovementValue();
 //         if (weightedDestination->GetWeight() <= MAX_MOVEMENT)
 //         {
+            // set last move
+		    ChessTile* PieceTile = GetTileInfos().GetTileInfoFromPiece(piece)->tile;
+		    SetLastMove(FMove{ piece, PieceTile->GetRow(), PieceTile->GetColum(), tileDestination->GetRow(), tileDestination->GetColum() });
+		    UE_LOG(LogTemp, Warning, TEXT("Piese - %s move from Row - %d Colum - %d to Row - %d Colum - %d"),
+			    *piece->GetName(), PieceTile->GetRow(), PieceTile->GetColum(), tileDestination->GetRow(), tileDestination->GetColum());
+
+            
+
             oldTile->piece = nullptr;
             newTile->piece = piece;
 
             piece->SetActorLocation(tileDestination->GetGlobalPosition());
+
+            
+			if (piece->getPieceType() == EPieces::PE_PAWN)
+			{
+				if (enPassantMove)
+				{
+				    for (AChessPiece* CPiece : CapturedPiece)
+				    {
+					    if (CPiece->getPieceType() == EPieces::PE_PAWN)
+					    {
+						    if (piece->IsWhite() && newTile->tile->GetRow() == mTileInfos.GetTileInfoFromPiece(CPiece)->tile->GetRow() + 1 ||
+                                !piece->IsWhite() && newTile->tile->GetRow() == mTileInfos.GetTileInfoFromPiece(CPiece)->tile->GetRow() - 1)
+						    {
+							    // TODO Checks Arrays
+							    CPiece->Destroy();
+						    }
+					    }
+				    }
+			    }
+                else if(piece->IsWhite() && tileDestination->GetRow() == 7 || !piece->IsWhite() && tileDestination->GetRow() == 0)
+                {
+                    // TODO If a pawn reaches its eight rank, it must be promoted to another piece
+                    UE_LOG(LogTemp, Warning, TEXT("Pawn must be promoted"));
+                }
+            }
             mCurrentSelectionPathfinding.reset(nullptr);
             HideAllSelectors();
             isValidMove = true;
@@ -202,6 +237,35 @@ bool BoardLogic::isRightColor(AChessPiece * piece, bool isWhite)
     return mBlackPieces.Contains(piece);
 }
 
+bool BoardLogic::isSimpleMove(int32 FutureRow, int32 FutureColum, AChessPiece* piece)
+{
+    if (FutureRow < 8 && FutureRow >= 0 && FutureColum < 8 && FutureColum >= 0)
+    {
+        if (mPiecesPosition[FutureRow][FutureColum])
+        {
+            if (piece->getPieceType() != EPieces::PE_PAWN)
+            {
+                if (piece->IsWhite() != mPiecesPosition[FutureRow][FutureColum]->IsWhite())
+                {
+                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+                    CapturedPiece.Add(mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece);
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if (!mPiecesPosition[FutureRow][FutureColum])
+        {
+            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+            return true;
+        }
+    }
+    return false;
+}
+
 void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 {
     Pathfinding pathfinding(mTileInfos);
@@ -209,329 +273,290 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 
     auto weightedTiles = pathfinding.GetWeightedTiles(tileInfo);
 
+    CapturedPiece.Empty();
+
     HideAllSelectors();
 
     // My HighlingPossiblePlacement
 
-    for (ChessTile tile : mTiles)
+	int32 CurentRow = tileInfo->tile->GetRow();
+	int32 CurentColum = tileInfo->tile->GetColum();
+
+    int32 mTilesNum = mTiles.Num();
+
+	// Clear Array TODO make better
+	for (int32 r = 0; r < 8; r++)
+	{
+		for (int32 c = 0; c < 8; c++)
+		{
+			mPiecesPosition[r][c] = nullptr;
+		}
+	}
+    for (int32 i = 0; i < mTilesNum; i++)
     {
-		//write colum and row
 
-        int32 CurentRow = tileInfo->tile->GetRow();
-		int32 CurentColum = tileInfo->tile->GetColum();
+        //write colum and row
+ 		int32 FutureRow = mTiles[i].GetRow();
+ 		int32 FutureColum = mTiles[i].GetColum();
 
-        int32 FutureRow = tile.GetRow();
-        int32 FutureColum = tile.GetColum();
-
-        switch (piece->getPieceType())
+        mPiecesPosition[FutureRow][FutureColum] = mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece;
+//        UE_LOG(LogTemp, Warning, TEXT("Row - %d  Colum - %d"), FutureRow, FutureColum);
+        if (mPiecesPosition[FutureRow][FutureColum])
         {
-        case EPieces::PE_PAWN:
-        {
-            // Wants to move forward
-            if (FutureColum == CurentColum)
+            UE_LOG(LogTemp, Warning, TEXT("Chess  - %s   Row - %d  Colum - %d"), *mPiecesPosition[FutureRow][FutureColum]->GetName(), FutureRow, FutureColum);
+        }
+        
+    }
+
+	int32 FutureRow = CurentRow;
+	int32 FutureColum = CurentColum;
+
+            switch (piece->getPieceType())
             {
+            case EPieces::PE_PAWN:
+            {
+                enPassantMove = false;
                 // Simple move forward
-                ChessTile* CurentTile = &tile;
+                FutureRow = piece->IsWhite() ? CurentRow + 1 : CurentRow - 1;
 
-                //                    bool isWhite = mTileInfos.GetTileInfoFromTile(CurentTile)->piece->IsWhite();
-                if (piece->IsWhite() && FutureRow == CurentRow + 1 || !piece->IsWhite() && FutureRow == CurentRow - 1)
+                if (isSimpleMove(FutureRow, FutureColum, piece))
                 {
-                    if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
+                    // if the Row is equal to the spawn Row of "Pawn"
+                    if (piece->IsWhite() && CurentRow == 1 || !piece->IsWhite() && CurentRow == 6)
                     {
-                        mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//                        tile.SetSelectorVisibility(true);
-                        //        					bValid = true;
+						// Double move forward
+						FutureRow = piece->IsWhite() ? CurentRow + 2 : CurentRow - 2;
+						isSimpleMove(FutureRow, FutureColum, piece);
                     }
                 }
-
-                // Double move forward
-                else if (piece->IsWhite() && FutureRow == CurentRow + 2 || !piece->IsWhite() && FutureRow == CurentRow - 2)
-                {
-                    // This is only allowed if the pawn is in its original place
-                    if (piece->IsWhite())
-                    {
-                        if (!mTileInfos.GetTileInfo(FutureRow - 1, FutureColum)->piece &&
-                            !mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece &&
-                            1 == CurentRow)
-                        {
-                            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//                            tile.SetSelectorVisibility(true);
-                            //        						bValid = true;
-                            //         					    }
-                        }
-                    }
-                    else /*if (!piece->IsWhite())*/
-                    {
-                        if (!mTileInfos.GetTileInfo(FutureRow + 1, FutureColum)->piece &&
-                            !mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece &&
-                            6 == CurentRow)
-                        {
-                            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//                                tile.SetSelectorVisibility(true);
-                            //         						    bValid = true;
-                        }
-                    }
-                    
-//          			else
-//          			{
-//          				// This is invalid
-//          				return false;
-//          			}
-//         		}
 
                 // The "en passant" move
-//          		else if ((Chess::isWhitePiece(chPiece) && 4 == CurentRow && 5 == FutureRow && 1 == abs(FutureColum - CurentColum)) ||
-//          			(Chess::isBlackPiece(chPiece) && 3 == CurentRow && 2 == FutureRow && 1 == abs(FutureColum - CurentColum)))
-//          		{
-//          			// It is only valid if last move of the opponent was a double move forward by a pawn on a adjacent column
-//          			string last_move = current_game->getLastMove();
-//          
-//          			// Parse the line
-//          			Chess::Position LastMoveFrom;
-//          			Chess::Position LastMoveTo;
-//          			current_game->parseMove(last_move, &LastMoveFrom, &LastMoveTo);
-//          
-//          			// First of all, was it a pawn?
-//          			char chLstMvPiece = current_game->getPieceAtPosition(LastMoveTo.iRow, LastMoveTo.iColumn);
-//          
-//          			if (toupper(chLstMvPiece) != 'P')
-//          			{
-//          				return false;
-//          			}
-//          
-//          			// Did the pawn have a double move forward and was it an adjacent column?
-//          			if (2 == abs(LastMoveTo.iRow - LastMoveFrom.iRow) && 1 == abs(LastMoveFrom.iColumn - CurentColum))
-//          			{
-//          				cout << "En passant move!\n";
-//          				bValid = true;
-//          
-//          				S_enPassant->bApplied = true;
-//          				S_enPassant->PawnCaptured.iRow = LastMoveTo.iRow;
-//          				S_enPassant->PawnCaptured.iColumn = LastMoveTo.iColumn;
-//          			}
-//          		}
-//          
-//          		// Wants to capture a piece
-//          		else if (1 == abs(FutureColum - CurentColum))
-//          		{
-//          			if ((Chess::isWhitePiece(chPiece) && FutureRow == CurentRow + 1) || (Chess::isBlackPiece(chPiece) && FutureRow == CurentRow - 1))
-//          			{
-//          				// Only allowed if there is something to be captured in the square
-//          				if (EMPTY_SQUARE != current_game->getPieceAtPosition(FutureRow, FutureColum))
-//          				{
-//          					bValid = true;
-//          					cout << "Pawn captured a piece!\n";
-//          				}
-//          			}
-//          		}
-//          		else
-//          		{
-//          			// This is invalid
-//          			return false;
-//          		}
-//          
-//          		// If a pawn reaches its eight rank, it must be promoted to another piece
-//          		if ((Chess::isWhitePiece(chPiece) && 7 == FutureRow) ||
-//          			(Chess::isBlackPiece(chPiece) && 0 == FutureRow))
-//          		{
-//          			cout << "Pawn must be promoted!\n";
-//          			S_promotion->bApplied = true;
+                // right
+                AChessPiece* PieceAtFuturePos;
+                PieceAtFuturePos = mPiecesPosition[CurentRow][CurentColum + 1];
+                if (PieceAtFuturePos)
+                {
+                    if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
+                    {
+                        FMove LastMove = GetLastMove();
+                        if (LastMove.Pieces->getPieceType() == EPieces::PE_PAWN)
+                        {
+                            if (PieceAtFuturePos == LastMove.Pieces && abs(LastMove.FromRow - LastMove.ToRow) == 2)
+                            {
+                                if (piece->IsWhite())
+                                    mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+                                else
+                                    mTileInfos.GetTileInfo(CurentRow - 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+                                
+                                CapturedPiece.Add(PieceAtFuturePos);
+                                enPassantMove = true;
+                            }
+                        }
+                    }
                 }
+                // left
+				PieceAtFuturePos = mPiecesPosition[CurentRow][CurentColum - 1];
+				if (PieceAtFuturePos)
+				{
+					if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
+					{
+						FMove LastMove = GetLastMove();
+						if (LastMove.Pieces->getPieceType() == EPieces::PE_PAWN)
+						{
+							if (PieceAtFuturePos == LastMove.Pieces && abs(LastMove.FromRow - LastMove.ToRow) == 2)
+							{
+                                if (piece->IsWhite())
+                                    mTileInfos.GetTileInfo(CurentRow + 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                                else
+                                    mTileInfos.GetTileInfo(CurentRow - 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                                CapturedPiece.Add(PieceAtFuturePos);
+                                enPassantMove = true;
+							}
+						}
+					}
+				}
+          		// Wants to capture a piece
+                if (piece->IsWhite())
+                {
+                    // right
+                    PieceAtFuturePos = mPiecesPosition[CurentRow + 1][CurentColum + 1];
+                    if (PieceAtFuturePos)
+                    {
+                        if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
+                        {
+							mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+							CapturedPiece.Add(PieceAtFuturePos);
+                        }
+                    }
+                    // left
+					PieceAtFuturePos = mPiecesPosition[CurentRow + 1][CurentColum - 1];
+					if (PieceAtFuturePos)
+					{
+						if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
+						{
+							mTileInfos.GetTileInfo(CurentRow + 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+							CapturedPiece.Add(PieceAtFuturePos);
+						}
+					}
+                }
+				if (!piece->IsWhite())
+				{
+					// right
+                    if (CurentRow > 0 && CurentColum <= 6)
+                    {
+					    PieceAtFuturePos = mPiecesPosition[CurentRow - 1][CurentColum + 1];
+					    if (PieceAtFuturePos)
+					    {
+						    if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
+						    {
+							    mTileInfos.GetTileInfo(CurentRow - 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+							    CapturedPiece.Add(PieceAtFuturePos);
+						    }
+					    }
+                    }
+					// left
+                    if (CurentRow > 0 && CurentColum < 0)
+                    {
+                        PieceAtFuturePos = mPiecesPosition[CurentRow - 1][CurentColum - 1];
+                        if (PieceAtFuturePos)
+                        {
+                            if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
+                            {
+                                mTileInfos.GetTileInfo(CurentRow - 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                                CapturedPiece.Add(PieceAtFuturePos);
+                            }
+                        }
+                    }
+				}
             }
-        }
-        break;
-        case EPieces::PE_ROOK:
-			// Horizontal move
-			if ((FutureRow == CurentRow) && (FutureColum != CurentColum))
-			{
-				// TODO Check if there are no pieces on the way
-//   				if (isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, Direction::HORIZONTAL))
-//   				{
-                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
-//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				    }
-			}
-			// Vertical move
-			else if ((FutureRow != CurentRow) && (FutureColum == CurentColum))
-			{
-				// TODO Check if there are no pieces on the way
-// 				if (current_game->isPathFree(present, future, Chess::VERTICAL))
-// 				{
-                 isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
-//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				}
-			}
             break;
-        case EPieces::PE_KNIGHT:
-		{
-			{
-                AChessPiece* OtherPiece = mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece;
-				if ((2 == abs(FutureRow - CurentRow)) && (1 == abs(FutureColum - CurentColum)))
-				{
-                    
-                    if (!OtherPiece || OtherPiece->IsWhite() != piece->IsWhite())
-                    {
-                        mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-                    }
-				}
-
-				else if ((1 == abs(FutureRow - CurentRow)) && (2 == abs(FutureColum - CurentColum)))
-				{
-                    if (!OtherPiece || OtherPiece->IsWhite() != piece->IsWhite())
-                    {
-                        mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-                    }
-				}
-			}
-		}
-            break;
-        case EPieces::PE_BISHOP:
-			// Diagonal move
-			if (abs(FutureRow - CurentRow) == abs(FutureColum - CurentColum))
-			{
-				// TODO Check if there are no pieces on the way
-// 				if (current_game->isPathFree(present, future, Chess::DIAGONAL))
-// 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
-//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				}
-			}
-            break;
-        case EPieces::PE_QUEEN:
-			// Horizontal move
-			if ((FutureRow == CurentRow) && (FutureColum != CurentColum))
-			{
-				// TODO Check if there are no pieces on the way
-// 				if (current_game->isPathFree(present, future, Chess::HORIZONTAL))
-// 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
-//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				}
-			}
-			// Vertical move
-			else if ((FutureRow != CurentRow) && (FutureColum == CurentColum))
-			{
-				// TODO Check if there are no pieces on the way
-// 				if (current_game->isPathFree(present, future, Chess::VERTICAL))
-// 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
-//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				}
-			}
-
-			// Diagonal move
-			else if (abs(FutureRow - CurentRow) == abs(FutureColum - CurentColum))
-			{
-				// TODO Check if there are no pieces on the way
-// 				if (current_game->isPathFree(present, future, Chess::DIAGONAL))
-// 				{
-                isPathFree(CurentRow, CurentColum, FutureRow, FutureColum, piece->IsWhite());
-//                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//				}
-			}
-            break;
-        case EPieces::PE_KING:
-			// Horizontal move by 1
-			if ((FutureRow == CurentRow) && (1 == abs(FutureColum - CurentColum)))
-			{
-                mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-			}
-
-			// Vertical move by 1
-			else if ((FutureColum == CurentColum) && (1 == abs(FutureRow - CurentRow)))
-			{
-                mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-			}
-
-			// Diagonal move by 1
-			else if ((1 == abs(FutureRow - CurentRow)) && (1 == abs(FutureColum - CurentColum)))
-			{
-                mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-			}
-
-			// Castling
-// 			else if ((FutureRow == CurentRow) && (2 == abs(FutureColum - CurentColum)))
-// 			{
-// 				// Castling is only allowed in these circunstances:
-// 
-// 				// 1. King is not in check
-// 				if (true == current_game->playerKingInCheck())
-// 				{
-// 					return false;
-// 				}
-// 
-// 				// 2. No pieces in between the king and the rook
-// 				if (false == current_game->isPathFree(present, future, Chess::HORIZONTAL))
-// 				{
-// 					return false;
-// 				}
-// 
-// 				// 3. King and rook must not have moved yet;
-// 				// 4. King must not pass through a square that is attacked by an enemy piece
-// 				if (FutureColum > CurentColum)
-// 				{
-// 					// if FutureColum is greather, it means king side
-// 					if (false == current_game->castlingAllowed(Chess::Side::KING_SIDE, Chess::getPieceColor(chPiece)))
-// 					{
-// 						createNextMessage("Castling to the king side is not allowed.\n");
-// 						return false;
-// 					}
-// 					else
-// 					{
-// 						// Check if the square that the king skips is not under attack
-// 						Chess::UnderAttack square_skipped = current_game->isUnderAttack(CurentRow, CurentColum + 1, current_game->getCurrentTurn());
-// 						if (false == square_skipped.bUnderAttack)
-// 						{
-// 							// Fill the S_castling structure
-// 							S_castling->bApplied = true;
-// 
-// 							// Present position of the rook
-// 							S_castling->rook_before.iRow = CurentRow;
-// 							S_castling->rook_before.iColumn = CurentColum + 3;
-// 
-// 							// Future position of the rook
-// 							S_castling->rook_after.iRow = FutureRow;
-// 							S_castling->rook_after.iColumn = CurentColum + 1; // FutureColum -1
-// 
-//                             mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-// 						}
-// 					}
-// 				}
-// 				else //if (FutureColum < CurentColum)
-// 				{
-// 					// if CurentColum is greather, it means queen side
-// 					if (false == current_game->castlingAllowed(Chess::Side::QUEEN_SIDE, Chess::getPieceColor(chPiece)))
-// 					{
-// 						createNextMessage("Castling to the queen side is not allowed.\n");
-// 						return false;
-// 					}
-// 					else
-// 					{
-// 						// Check if the square that the king skips is not attacked
-// 						Chess::UnderAttack square_skipped = current_game->isUnderAttack(CurentRow, CurentColum - 1, current_game->getCurrentTurn());
-// 						if (false == square_skipped.bUnderAttack)
-// 						{
-// 							// Fill the S_castling structure
-// 							S_castling->bApplied = true;
-// 
-// 							// Present position of the rook
-// 							S_castling->rook_before.iRow = CurentRow;
-// 							S_castling->rook_before.iColumn = CurentColum - 4;
-// 
-// 							// Future position of the rook
-// 							S_castling->rook_after.iRow = FutureRow;
-// 							S_castling->rook_after.iColumn = CurentColum - 1; // FutureColum +1
-// 
-//                             mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-// 						}
-// 					}
-// 				}
-// 			}
-            break;
-        default:
-            break;
-        }
-    }
+            case EPieces::PE_ROOK:
+			    // Horizontal move
+                isPathFree(CurentRow, CurentColum, piece->IsWhite(), Direction::HORIZONTAL);
+			    // Vertical move
+                isPathFree(CurentRow, CurentColum, piece->IsWhite(), Direction::VERTICAL);
+                break;
+            case EPieces::PE_KNIGHT:
+		    {
+                isSimpleMove(CurentRow + 2, CurentColum + 1, piece);
+                isSimpleMove(CurentRow + 2, CurentColum - 1, piece);
+                isSimpleMove(CurentRow + 1, CurentColum + 2, piece);
+                isSimpleMove(CurentRow + 1, CurentColum - 2, piece);
+                isSimpleMove(CurentRow - 1, CurentColum + 2, piece);
+                isSimpleMove(CurentRow - 1, CurentColum - 2, piece);
+                isSimpleMove(CurentRow - 2, CurentColum + 1, piece);
+                isSimpleMove(CurentRow - 2, CurentColum - 1, piece);
+		    }
+                break;
+             case EPieces::PE_BISHOP:
+// 			    // Diagonal move
+                 isPathFree(CurentRow, CurentColum, piece->IsWhite(), Direction::DIAGONAL);
+                 break;
+             case EPieces::PE_QUEEN:
+				 // Horizontal move
+				 isPathFree(CurentRow, CurentColum, piece->IsWhite(), Direction::HORIZONTAL);
+				 // Vertical move
+				 isPathFree(CurentRow, CurentColum, piece->IsWhite(), Direction::VERTICAL);
+// 			     // Diagonal move
+ 			     isPathFree(CurentRow, CurentColum, piece->IsWhite(), Direction::DIAGONAL);
+                 break;
+             case EPieces::PE_KING:
+ 			     // Horizontal move by 1
+                 isSimpleMove(CurentRow, CurentColum + 1, piece);
+                 isSimpleMove(CurentRow, CurentColum - 1, piece);
+ 			     // Vertical move by 1
+                 isSimpleMove(CurentRow + 1, CurentColum, piece);
+                 isSimpleMove(CurentRow - 1, CurentColum, piece);
+ 
+ 			     // Diagonal move by 1
+				 isSimpleMove(CurentRow + 1, CurentColum + 1, piece);
+				 isSimpleMove(CurentRow - 1, CurentColum - 1, piece);
+				 isSimpleMove(CurentRow - 1, CurentColum + 1, piece);
+				 isSimpleMove(CurentRow + 1, CurentColum - 1, piece);
+ 
+ 			    // Castling
+     // 			else if ((FutureRow == CurentRow) && (2 == abs(FutureColum - CurentColum)))
+     // 			{
+     // 				// Castling is only allowed in these circunstances:
+     // 
+     // 				// 1. King is not in check
+     // 				if (true == current_game->playerKingInCheck())
+     // 				{
+     // 					return false;
+     // 				}
+     // 
+     // 				// 2. No pieces in between the king and the rook
+     // 				if (false == current_game->isPathFree(present, future, Chess::HORIZONTAL))
+     // 				{
+     // 					return false;
+     // 				}
+     // 
+     // 				// 3. King and rook must not have moved yet;
+     // 				// 4. King must not pass through a square that is attacked by an enemy piece
+     // 				if (FutureColum > CurentColum)
+     // 				{
+     // 					// if FutureColum is greather, it means king side
+     // 					if (false == current_game->castlingAllowed(Chess::Side::KING_SIDE, Chess::getPieceColor(chPiece)))
+     // 					{
+     // 						createNextMessage("Castling to the king side is not allowed.\n");
+     // 						return false;
+     // 					}
+     // 					else
+     // 					{
+     // 						// Check if the square that the king skips is not under attack
+     // 						Chess::UnderAttack square_skipped = current_game->isUnderAttack(CurentRow, CurentColum + 1, current_game->getCurrentTurn());
+     // 						if (false == square_skipped.bUnderAttack)
+     // 						{
+     // 							// Fill the S_castling structure
+     // 							S_castling->bApplied = true;
+     // 
+     // 							// Present position of the rook
+     // 							S_castling->rook_before.iRow = CurentRow;
+     // 							S_castling->rook_before.iColumn = CurentColum + 3;
+     // 
+     // 							// Future position of the rook
+     // 							S_castling->rook_after.iRow = FutureRow;
+     // 							S_castling->rook_after.iColumn = CurentColum + 1; // FutureColum -1
+     // 
+     //                             mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+     // 						}
+     // 					}
+     // 				}
+     // 				else //if (FutureColum < CurentColum)
+     // 				{
+     // 					// if CurentColum is greather, it means queen side
+     // 					if (false == current_game->castlingAllowed(Chess::Side::QUEEN_SIDE, Chess::getPieceColor(chPiece)))
+     // 					{
+     // 						createNextMessage("Castling to the queen side is not allowed.\n");
+     // 						return false;
+     // 					}
+     // 					else
+     // 					{
+     // 						// Check if the square that the king skips is not attacked
+     // 						Chess::UnderAttack square_skipped = current_game->isUnderAttack(CurentRow, CurentColum - 1, current_game->getCurrentTurn());
+     // 						if (false == square_skipped.bUnderAttack)
+     // 						{
+     // 							// Fill the S_castling structure
+     // 							S_castling->bApplied = true;
+     // 
+     // 							// Present position of the rook
+     // 							S_castling->rook_before.iRow = CurentRow;
+     // 							S_castling->rook_before.iColumn = CurentColum - 4;
+     // 
+     // 							// Future position of the rook
+     // 							S_castling->rook_after.iRow = FutureRow;
+     // 							S_castling->rook_after.iColumn = CurentColum - 1; // FutureColum +1
+     // 
+     //                             mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+     // 						}
+     // 					}
+     // 				}
+     // 			}
+                 break;
+            default:
+                break;
+            }
+//    }
 
 //     for (auto & tile : weightedTiles.GetFlatArray())
 //     {
@@ -563,210 +588,122 @@ void BoardLogic::HideAllSelectors()
     }
 }
 
-//bool BoardLogic::isPathFree(Position startingPos, Position finishingPos, int iDirection)
-bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, int32 FutureRow, int32 FutureColum, bool isWhitePiece)
+bool BoardLogic::isPathFree(int32 CurentRow, int32 CurentColum, bool isWhitePiece, Direction MoveDirection)
 {
-	//bool bFree = false;
-    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+	int32 FutureRow = CurentRow;
+	int32 FutureColum = CurentColum;
 
-	AChessPiece* OtherPiece = mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece;
-
-	if (!OtherPiece || OtherPiece->IsWhite() != isWhitePiece)
-    {
-		mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-	}
-
-// 	switch (iDirection)
-// 	{
-// 	case Direction::HORIZONTAL:
-// 	{
-		// If it is a horizontal move, we can assume the CurentRow == FutureRow
-		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
-		if (CurentColum == FutureColum)
-		{
-//			cout << "Error. Movement is horizontal but column is the same\n";
-		}
-
-		// Moving to the right
-		else if (CurentColum < FutureColum)
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-//             if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
-//             {
-//                 mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-//             }
-
-			for (int i = CurentColum + 1; i < FutureColum; i++)
+	switch (MoveDirection)
+	{
+	    case Direction::HORIZONTAL:
+	    {
+		    // Moving to the right
+			for (int i = CurentColum + 1; i <= 7; i++)
 			{
-				if (mTileInfos.GetTileInfo(CurentRow, i)->piece)
-				{
-// 					bFree = false;
-// 					cout << "Horizontal path to the right is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
-				}
+                if (!CheckPath(CurentRow, i, isWhitePiece))
+                {
+                    break;
+                }
 			}
-		}
-
 		// Moving to the left
-		else //if (CurentColum > FutureColum)
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-// 			if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
-// 			{
-// 				mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-// 			}
-
-			for (int i = CurentColum - 1; i > FutureColum; i--)
+			for (int i = CurentColum - 1; i >= 0; i--)
 			{
-				if (mTileInfos.GetTileInfo(CurentRow, i)->piece)
+				if (!CheckPath(CurentRow, i, isWhitePiece))
 				{
-// 					bFree = false;
-// 					cout << "Horizontal path to the left is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
-//	}
-// 	break;
-// 
-// 	case Direction::VERTICAL:
-// 	{
-		// If it is a vertical move, we can assume the CurentColum == FutureColum
-		// If the piece wants to move from column 0 to column 7, we must check if columns 1-6 are free
-		if (CurentRow == FutureRow)
-		{
-// 			cout << "Error. Movement is vertical but row is the same\n";
-// 			throw("Error. Movement is vertical but row is the same");
-		}
-
-		// Moving up
-		else if (CurentRow < FutureRow)
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-// 			if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
-// 			{
-// 				mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-// 			}
-
-			for (int i = CurentRow + 1; i < FutureRow; i++)
+	    }
+	    break;
+	    case Direction::VERTICAL:
+	    {
+		    // Moving up
+			for (int i = CurentRow + 1; i <= 7; i++)
 			{
-				if (mTileInfos.GetTileInfo(i, CurentColum)->piece)
+				if (!CheckPath(i, CurentColum, isWhitePiece))
 				{
-// 					bFree = false;
-// 					cout << "Vertical path up is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
-
 		// Moving down
-		else //if (CurentColum > FutureRow)
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-// 			if (!mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece)
-// 			{
-// 				mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-// 			}
-
-			for (int i = CurentRow - 1; i > FutureRow; i--)
+ 			for (int i = CurentRow - 1; i >= 0; i--)
 			{
-				if (mTileInfos.GetTileInfo(i, CurentColum)->piece)
+				if (!CheckPath(i, CurentColum, isWhitePiece))
 				{
-// 					bFree = false;
-// 					cout << "Vertical path down is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
-//	}
-// 	break;
-// 
-// 	case Direction::DIAGONAL:
-// 	{
-		// Moving up and right
-		if ((FutureRow > CurentRow) && (FutureColum > CurentColum))
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-
-			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+	    }
+	    break;
+	    case Direction::DIAGONAL:
+	    {
+		    // Moving up and right
+			for (int32 r = CurentRow + 1, c = CurentColum + 1; r <= 7 && c <= 7; r++, c++)
 			{
-				if (mTileInfos.GetTileInfo(CurentRow + i, CurentColum + i)->piece)
+				if (!CheckPath(r, c, isWhitePiece))
 				{
-// 					bFree = false;
-// 					cout << "Diagonal path up-right is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
-
-		// Moving up and left
-		else if ((FutureRow > CurentRow) && (FutureColum < CurentColum))
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-
-			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+		    // Moving up and left
+			for (int32 r = CurentRow + 1, c = CurentColum - 1; r <= 7 && c >= 0; r++, c--)
 			{
-				if (mTileInfos.GetTileInfo(CurentRow + i, CurentColum - i)->piece)
+				if (!CheckPath(r, c, isWhitePiece))
 				{
-// 					bFree = false;
-// 					cout << "Diagonal path up-left is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
-
-		// Moving down and right
-		else if ((FutureRow < CurentRow) && (FutureColum > CurentColum))
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-
-			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+		    // Moving down and right
+			for (int32 r = CurentRow - 1, c = CurentColum + 1; r >= 0 && c <= 7; r--, c++)
 			{
-				if (mTileInfos.GetTileInfo(CurentRow - i, CurentColum + i)->piece)
+				if (!CheckPath(r, c, isWhitePiece))
 				{
-					//bFree = false;
-					//cout << "Diagonal path down-right is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
-
-		// Moving down and left
-		else if ((FutureRow < CurentRow) && (FutureColum < CurentColum))
-		{
-			// Settting bFree as initially true, only inside the cases, guarantees that the path is checked
-			//bFree = true;
-//            mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
-
-			for (int i = 1; i < abs(FutureRow - CurentRow); i++)
+		    // Moving down and left
+			for (int32 r = CurentRow - 1, c = CurentColum - 1; r >= 0 && c >= 0; r--, c--)
 			{
-				if (mTileInfos.GetTileInfo(CurentRow - i, CurentColum - i)->piece)
+				if (!CheckPath(r, c, isWhitePiece))
 				{
-// 					bFree = false;
-// 					cout << "Diagonal path down-left is not clear!\n";
-                    mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(false);
+					break;
 				}
 			}
-		}
+	    }
+	    break;
+	}
+    return false;
+}
 
-// 		else
-// 		{
-// 			throw("Error. Diagonal move not allowed");
-// 		}
-// 	}
-// 	break;
-// 	}
+bool BoardLogic::CheckPath(int32 Row, int32 Colum, bool isWhitePiece)
+{
+	AChessPiece* OtherPiece;
+	OtherPiece = mTileInfos.GetTileInfo(Row, Colum)->piece;
+	if (!OtherPiece)
+	{
+		mTileInfos.GetTileInfo(Row, Colum)->tile->SetSelectorVisibility(true);
+		return true;
+	}
+	else if (OtherPiece->IsWhite() != isWhitePiece)
+	{
+		mTileInfos.GetTileInfo(Row, Colum)->tile->SetSelectorVisibility(true);
+		CapturedPiece.Add(OtherPiece);
+		return false;
+	}
+	else if (OtherPiece->IsWhite() == isWhitePiece)
+	{
+		mTileInfos.GetTileInfo(Row, Colum)->tile->SetSelectorVisibility(false);
+		return false;
+	}
+	return false;
+}
 
-//	return bFree;
-return true;
+void BoardLogic::SetLastMove(FMove Move)
+{
+	AllMoves.Add(Move);
+}
+
+FMove BoardLogic::GetLastMove()
+{
+	return AllMoves.Last();
 }

@@ -84,6 +84,7 @@ void AChessPlayerController::ProcessMouseClick()
 		}
 		else if (auto chessBoard = Cast<AChessBoard>(actorHit.Get()))
 		{
+			ActorCatched = false;
 			auto component = hit.Component;
 			if (component.IsValid()) // to be on safe side
 			{

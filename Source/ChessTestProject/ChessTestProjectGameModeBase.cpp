@@ -94,6 +94,7 @@ bool AChessTestProjectGameModeBase::playTurn(AChessPiece* piece, UStaticMeshComp
 
 				FTimerHandle switchCameraTimer;
 				GetWorldTimerManager().SetTimer(switchCameraTimer, timedDelegate, .3f, false);
+
 			}
 		}
 	}
@@ -119,6 +120,7 @@ bool AChessTestProjectGameModeBase::playTurnGetPiese(AChessPiece* piece, AChessP
 				FTimerHandle switchCameraTimer;
 				GetWorldTimerManager().SetTimer(switchCameraTimer, timedDelegate, .3f, false);
 			}
+			// TODO Checks Arrays
 			gettedPiece->Destroy();
 		}
 	}
@@ -134,3 +136,13 @@ bool AChessTestProjectGameModeBase::IsWhiteTurn() const
 {
 	return mIsWhiteTurn;
 }
+
+// void AChessTestProjectGameModeBase::SetLastMove(FMove Move)
+// {
+// 	AllMoves.Add(Move);
+// }
+// 
+// FMove AChessTestProjectGameModeBase::GetLastMove()
+// {
+// 	return AllMoves.Last();
+// }

@@ -10,6 +10,18 @@
 /**
  * 
  */
+// USTRUCT()
+// struct FMove
+// {
+// 	GENERATED_USTRUCT_BODY()
+// 
+// 	AChessPiece* Pieces;
+// 	int32 FromRow;
+// 	int32 FromColumn;
+// 	int32 ToRow;
+// 	int32 ToColumn;
+// };
+
 UCLASS()
 class CHESSTESTPROJECT_API AChessTestProjectGameModeBase : public AGameModeBase
 {
@@ -31,10 +43,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowPiecePossibleMovement(AChessPiece* piece);
 	bool IsWhiteTurn() const;
+// 	void SetLastMove(FMove Move);
+// 	FMove GetLastMove();
 
 private:
 	std::unique_ptr<BoardLogic> mBoardLogic;
 	bool mIsWhiteTurn = true;
+/*	TArray<FMove> AllMoves;*/
 
 	AChessBoard* getChessBoard() const;
 
