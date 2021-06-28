@@ -249,6 +249,7 @@ bool BoardLogic::isSimpleMove(int32 FutureRow, int32 FutureColum, AChessPiece* p
                 {
                     mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
                     CapturedPiece.Add(mTileInfos.GetTileInfo(FutureRow, FutureColum)->piece);
+                    AvailableTiles.Add(mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile);
                 }
                 return true;
             }
@@ -260,6 +261,7 @@ bool BoardLogic::isSimpleMove(int32 FutureRow, int32 FutureColum, AChessPiece* p
         else if (!mPiecesPosition[FutureRow][FutureColum])
         {
             mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile->SetSelectorVisibility(true);
+            AvailableTiles.Add(mTileInfos.GetTileInfo(FutureRow, FutureColum)->tile);
             return true;
         }
     }
@@ -274,6 +276,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
     auto weightedTiles = pathfinding.GetWeightedTiles(tileInfo);
 
     CapturedPiece.Empty();
+//    AvailablePlaces.Empty();
+    AvailableTiles.Empty();
 
     HideAllSelectors();
 
@@ -344,9 +348,16 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
                             if (PieceAtFuturePos == LastMove.Pieces && abs(LastMove.FromRow - LastMove.ToRow) == 2)
                             {
                                 if (piece->IsWhite())
+                                { 
                                     mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+                                    //AvailablePlaces.Add(TPairInitializer<int32,int32>(CurentRow + 1, CurentColum + 1));
+                                    AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile);
+                                }
                                 else
+                                { 
                                     mTileInfos.GetTileInfo(CurentRow - 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+                                    AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile);
+                                }
                                 
                                 CapturedPiece.Add(PieceAtFuturePos);
                                 enPassantMove = true;
@@ -366,9 +377,15 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 							if (PieceAtFuturePos == LastMove.Pieces && abs(LastMove.FromRow - LastMove.ToRow) == 2)
 							{
                                 if (piece->IsWhite())
+                                { 
                                     mTileInfos.GetTileInfo(CurentRow + 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                                    AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow + 1, CurentColum - 1)->tile);
+                                }
                                 else
+                                {
                                     mTileInfos.GetTileInfo(CurentRow - 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                                    AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow - 1, CurentColum - 1)->tile);
+                                }
                                 CapturedPiece.Add(PieceAtFuturePos);
                                 enPassantMove = true;
 							}
@@ -385,6 +402,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
                         if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
                         {
 							mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+                            AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow + 1, CurentColum + 1)->tile);
 							CapturedPiece.Add(PieceAtFuturePos);
                         }
                     }
@@ -395,6 +413,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 						if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
 						{
 							mTileInfos.GetTileInfo(CurentRow + 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                            AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow + 1, CurentColum - 1)->tile);
 							CapturedPiece.Add(PieceAtFuturePos);
 						}
 					}
@@ -410,6 +429,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 						    if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
 						    {
 							    mTileInfos.GetTileInfo(CurentRow - 1, CurentColum + 1)->tile->SetSelectorVisibility(true);
+                                AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow - 1, CurentColum + 1)->tile);
 							    CapturedPiece.Add(PieceAtFuturePos);
 						    }
 					    }
@@ -423,6 +443,7 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
                             if (piece->IsWhite() != PieceAtFuturePos->IsWhite())
                             {
                                 mTileInfos.GetTileInfo(CurentRow - 1, CurentColum - 1)->tile->SetSelectorVisibility(true);
+                                AvailableTiles.Add(mTileInfos.GetTileInfo(CurentRow - 1, CurentColum - 1)->tile);
                                 CapturedPiece.Add(PieceAtFuturePos);
                             }
                         }
@@ -682,17 +703,20 @@ bool BoardLogic::CheckPath(int32 Row, int32 Colum, bool isWhitePiece)
 	if (!OtherPiece)
 	{
 		mTileInfos.GetTileInfo(Row, Colum)->tile->SetSelectorVisibility(true);
+        AvailableTiles.Add(mTileInfos.GetTileInfo(Row, Colum)->tile);
 		return true;
 	}
 	else if (OtherPiece->IsWhite() != isWhitePiece)
 	{
 		mTileInfos.GetTileInfo(Row, Colum)->tile->SetSelectorVisibility(true);
+        AvailableTiles.Add(mTileInfos.GetTileInfo(Row, Colum)->tile);
 		CapturedPiece.Add(OtherPiece);
 		return false;
 	}
 	else if (OtherPiece->IsWhite() == isWhitePiece)
 	{
 		mTileInfos.GetTileInfo(Row, Colum)->tile->SetSelectorVisibility(false);
+        AvailableTiles.Add(mTileInfos.GetTileInfo(Row, Colum)->tile);
 		return false;
 	}
 	return false;

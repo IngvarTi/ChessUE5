@@ -95,6 +95,8 @@ public:
 private:
     TArray<FMove> AllMoves;
     TArray<AChessPiece*> CapturedPiece;
+//    TArray<TPair<int32, int32>> AvailablePlaces;
+    TArray<ChessTile*> AvailableTiles;
     bool enPassantMove;
 
     void CreateTiles();
