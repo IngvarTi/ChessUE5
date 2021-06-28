@@ -15,6 +15,7 @@ BoardLogic::BoardLogic(AChessBoard* board, UWorld* world)
     CreateTiles();
     PlacePieces();
     enPassantMove = false;
+    isCheck = false;
 }
 
 void BoardLogic::CreateTiles()
@@ -171,6 +172,75 @@ bool BoardLogic::MovePiece(AChessPiece* piece, ChessTile * tileDestination)
 
             piece->SetActorLocation(tileDestination->GetGlobalPosition());
 
+            // Would the king be in check after the move?
+            TArray<AChessPiece*> CapturedPieceAfterMove = HighlingPossiblePlacement(piece);
+            for (AChessPiece* CPiece : CapturedPieceAfterMove)
+            {
+                if (CPiece->getPieceType() == EPieces::PE_KING)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Check !!!"));
+					if (GEngine)
+						GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Check !!!"));
+                    // 
+                    HighlingPossiblePlacement(CPiece);
+                    TArray<ChessTile*> AvailableTilesForKing = AvailableTiles;
+                    if (piece->IsWhite())
+                    {
+						for (AChessPiece* wPiece : mWhitePieces)
+						{
+                            HighlingPossiblePlacement(wPiece);
+                            //for (ChessTile* AvailableTile : AvailableTilesForKing)
+                            for (int32 at = 0; at < AvailableTilesForKing.Num(); at++)
+                            {
+                                for (int32 dt = 0; dt < AvailableTiles.Num(); dt++)
+                                {
+                                    if (at < AvailableTilesForKing.Num())
+                                    {
+										if (AvailableTilesForKing[at] == AvailableTiles[dt])
+										{
+											int32 index = AvailableTilesForKing.Find(AvailableTiles[dt]);
+											AvailableTilesForKing.RemoveAt(index);
+										}
+                                    }
+                                }
+                            }
+						}
+                        if (AvailableTilesForKing.Num() == 0)
+                        {
+							UE_LOG(LogTemp, Warning, TEXT("Check MATE !!!"));
+							if (GEngine)
+								GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Check MATE !!!"));
+                        }
+                    }
+                    else
+                    {
+						for (AChessPiece* bPiece : mBlackPieces)
+						{
+							HighlingPossiblePlacement(bPiece);
+							for (int32 at = 0; at < AvailableTilesForKing.Num(); at++)
+							{
+								for (int32 dt = 0; dt < AvailableTiles.Num(); dt++)
+								{
+                                    if (at < AvailableTilesForKing.Num())
+                                    {
+                                        if (AvailableTilesForKing[at] == AvailableTiles[dt])
+                                        {
+                                            int32 index = AvailableTilesForKing.Find(AvailableTiles[dt]);
+                                            AvailableTilesForKing.RemoveAt(index);
+                                        }
+                                    }
+								}
+							}
+						}
+						if (AvailableTilesForKing.Num() == 0)
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Check MATE !!!"));
+							if (GEngine)
+								GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Check MATE !!!"));
+						}
+                    }
+                }
+            }
             
 			if (piece->getPieceType() == EPieces::PE_PAWN)
 			{
@@ -268,7 +338,7 @@ bool BoardLogic::isSimpleMove(int32 FutureRow, int32 FutureColum, AChessPiece* p
     return false;
 }
 
-void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
+TArray<AChessPiece*> BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 {
     Pathfinding pathfinding(mTileInfos);
     auto tileInfo = mTileInfos.GetTileInfoFromPiece(piece);
@@ -589,6 +659,8 @@ void BoardLogic::HighlingPossiblePlacement(AChessPiece * piece)
 //    }
 
     mCurrentSelectionPathfinding = std::make_unique<WeightedTiles>(std::move(weightedTiles));
+
+    return CapturedPiece;
 }
 
 TileInformations BoardLogic::GetTileInfos()

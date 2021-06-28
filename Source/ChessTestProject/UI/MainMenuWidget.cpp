@@ -19,10 +19,6 @@ void UMainMenuWidget::NativeConstruct()
 	{
 		QuitBtn->OnClicked.AddDynamic(this, &UMainMenuWidget::OnQuitClicked);
 	}
-	if (QuitBtn)
-	{
-		QuitBtn->OnClicked.AddDynamic(this, &UMainMenuWidget::OnQuitClicked);
-	}
 	if (PauseBtn)
 	{
 		PauseBtn->OnClicked.AddDynamic(this, &UMainMenuWidget::OnPauseClicked);

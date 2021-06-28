@@ -79,7 +79,7 @@ public:
     ChessTile * getChessTileFromComponent(UStaticMeshComponent * component);
 
     bool isRightColor(AChessPiece * piece, bool isWhite);
-    void HighlingPossiblePlacement(AChessPiece * piece);
+    TArray<AChessPiece*> HighlingPossiblePlacement(AChessPiece * piece);
 
     bool isSimpleMove(int32 FutureRow, int32 FutureColum, AChessPiece* piece);
 
@@ -98,6 +98,7 @@ private:
 //    TArray<TPair<int32, int32>> AvailablePlaces;
     TArray<ChessTile*> AvailableTiles;
     bool enPassantMove;
+    bool isCheck;
 
     void CreateTiles();
     void PlacePieces();
