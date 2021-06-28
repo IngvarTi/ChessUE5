@@ -29,6 +29,8 @@ protected:
 	UButton * RulesBtn;
 	UPROPERTY(meta = (BindWidgetOptional))
 	UButton * QuitBtn;
+	UPROPERTY(meta = (BindWidgetOptional))
+	UButton* PauseBtn;
 
 	UFUNCTION()
 	void OnPlayClicked();
@@ -36,4 +38,6 @@ protected:
 	void OnRestartClicked();
 	UFUNCTION()
 	void OnQuitClicked();
+	UFUNCTION()
+	void OnPauseClicked();
 };
