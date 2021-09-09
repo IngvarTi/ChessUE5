@@ -25,17 +25,17 @@ AChessBoard::AChessBoard()
 void AChessBoard::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
-    CreateBoardLayout();
     ComputeCameraSettings();
 
-    mPiecesPlacement.SetNum(mNbTiles);
 }
 
 // Called when the game starts or when spawned
 void AChessBoard::BeginPlay()
 {
     Super::BeginPlay();
+    CreateBoardLayout();
     ComputeCameraSettings();
+    mPiecesPlacement.SetNum( mNbTiles );
 }
 
 void AChessBoard::Tick(float DeltaSeconds)

@@ -9,14 +9,13 @@
 
 void AChessTestProjectGameModeBase::StartPlay()
 {
+	Super::StartPlay();
 	if (auto board = getChessBoard())
 	{
 		mBoardLogic = std::make_unique<BoardLogic>(board, GetWorld());
 	}
 
 	ChessPieces = mBoardLogic->GetChessPieces();
-
-	Super::StartPlay();
 }
 
 AChessBoard* AChessTestProjectGameModeBase::getChessBoard() const
@@ -135,6 +134,18 @@ void AChessTestProjectGameModeBase::ShowPiecePossibleMovement(AChessPiece* piece
 bool AChessTestProjectGameModeBase::IsWhiteTurn() const
 {
 	return mIsWhiteTurn;
+}
+
+TSubclassOf<AActor> AChessTestProjectGameModeBase::GetBlueprintRessource( FString Name )
+{
+	for (int32 i = 0; i < ChessBlueprintsClass.Num(); i++)
+	{
+		if (ChessBlueprintsClass[i]->GetName().Equals( Name ))
+		{
+			return ChessBlueprintsClass[i];
+		}
+	}
+	return nullptr;
 }
 
 // void AChessTestProjectGameModeBase::SetLastMove(FMove Move)

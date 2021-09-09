@@ -3,7 +3,7 @@
 #include "BoardLogic.h"
 #include "ChessTestProject/EditorRessourceBank.h"
 #include "Pathfinding.h"
-
+#include "ChessTestProject/ChessTestProjectGameModeBase.h"
 
 #include "EngineUtils.h"
 
@@ -94,51 +94,57 @@ void BoardLogic::PlacePieces()
         {
             using RessourceBlueprints = EditorRessourceBank::RessourceBlueprints;
 
-            RessourceBlueprints type = RessourceBlueprints::PIECE_PAWN;
+            FString PieceName;
 
             switch (currentPiece)
             {
                 case 1:
-                    type = RessourceBlueprints::PIECE_PAWN;
+                    PieceName = "BP_Pawn_C";
                     break;
                 case 2:
-                    type = RessourceBlueprints::PIECE_ROOK;
+                    //type = RessourceBlueprints::PIECE_ROOK;
+                    PieceName = "BP_Rook_C";
                     break;
                 case 3:
-                    type = RessourceBlueprints::PIECE_KNIGHT;
+                    //type = RessourceBlueprints::PIECE_KNIGHT;
+                    PieceName = "BP_Knight_C";
                     break;
                 case 4:
-                    type = RessourceBlueprints::PIECE_BISHOP;
+                    //type = RessourceBlueprints::PIECE_BISHOP;
+                    PieceName = "BP_Bishop_C";
                     break;
                 case 5:
-                    type = RessourceBlueprints::PIECE_QUEEN;
+                    //type = RessourceBlueprints::PIECE_QUEEN;
+                    PieceName = "BP_Queen_C";
                     break;
                 case 6:
-                    type = RessourceBlueprints::PIECE_KING;
+                    //type = RessourceBlueprints::PIECE_KING;
+                    PieceName = "BP_King_C";
                     break;
                 default:
                     break;
             }
 
-            if (auto pieceActor = EditorRessourceBank::GetBlueprintRessource(/*type*/currentPiece))
+            AChessTestProjectGameModeBase* MyGameMode = ( AChessTestProjectGameModeBase* )mWorld->GetAuthGameMode();
+            if (MyGameMode)
             {
-                chessPiece = mWorld->SpawnActor<AChessPiece>(
-                    pieceActor->GeneratedClass,
-                    spawnPosition,
-                    spawnRotation);
-
-                if (chessPiece)
+                auto pieceActor = MyGameMode->GetBlueprintRessource(PieceName );
+                if (pieceActor)
                 {
-                    chessPiece->setIsWhite(!isBlack);
-                    mPieces.Add(chessPiece);
-                    tileInfo->piece = chessPiece;
-                    if (isBlack)
+                    chessPiece = mWorld->SpawnActor<AChessPiece>(pieceActor, spawnPosition, spawnRotation);
+                    if (chessPiece)
                     {
-                        mBlackPieces.Add(chessPiece);
-                    }
-                    else
-                    {
-                        mWhitePieces.Add(chessPiece);
+                        chessPiece->setIsWhite(!isBlack);
+                        mPieces.Add(chessPiece);
+                        tileInfo->piece = chessPiece;
+                        if (isBlack)
+                        {
+                            mBlackPieces.Add(chessPiece);
+                        }
+                        else
+                        {
+                            mWhitePieces.Add(chessPiece);
+                        }
                     }
                 }
             }

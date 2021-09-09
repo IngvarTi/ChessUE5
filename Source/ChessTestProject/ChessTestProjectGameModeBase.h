@@ -34,6 +34,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AChessPiece*> ChessPieces;
 
+	UPROPERTY( BlueprintReadWrite, EditDefaultsOnly, Category = "Parameters" )
+	TArray <TSubclassOf<AActor>> ChessBlueprintsClass;
+
 	UFUNCTION(BlueprintCallable)
 	TArray<AChessPiece*> GetChessPieces();
 
@@ -45,6 +48,8 @@ public:
 	bool IsWhiteTurn() const;
 // 	void SetLastMove(FMove Move);
 // 	FMove GetLastMove();
+
+	TSubclassOf<AActor> GetBlueprintRessource(FString Name);
 
 private:
 	std::unique_ptr<BoardLogic> mBoardLogic;
