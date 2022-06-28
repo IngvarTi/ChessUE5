@@ -70,7 +70,7 @@ class CHESSTESTPROJECT_API BoardLogic
     TArray<AChessPiece*> piecesAvailableForCapture;
 
 public:
-    BoardLogic() = default;
+    BoardLogic()/* = default*/;
     BoardLogic(AChessBoard* board, UWorld* world);
 
     //returns false if move is invalid

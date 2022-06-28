@@ -21,9 +21,13 @@ public:
 
 private:
 	void rotateCamera();
+	void ProcessClick();
 	void ProcessMouseClick();
+	void ProcessTouchClick(ETouchIndex::Type FingerIndex, FVector Location);
 
 	AChessPiece* mSelectedPiece = nullptr;
 
 	AChessPiece* ActorCatched = nullptr;
+
+	FHitResult ClickAndTouchHit;
 };

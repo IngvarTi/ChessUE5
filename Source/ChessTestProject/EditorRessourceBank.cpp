@@ -9,9 +9,9 @@ EditorRessourceBank * EditorRessourceBank::mSingleton = nullptr;
 namespace
 {
     template <class C, class I>
-    void AddElement(std::vector<std::pair<I, C>> & toAddInto, I key, FString path)
+    void AddElement(typename std::vector<typename std::pair<I, C>> & toAddInto, I key, FString path)
     {
-        ConstructorHelpers::FObjectFinder<std::remove_pointer<C>::type> element(*path);
+        ConstructorHelpers::FObjectFinder<typename std::remove_pointer<C>::type> element(*path);
 
         if (element.Succeeded())
         {
@@ -43,9 +43,9 @@ EditorRessourceBank::EditorRessourceBank()
 
 }
 
-EditorRessourceBank::~EditorRessourceBank()
-{
-}
+//EditorRessourceBank::~EditorRessourceBank()
+//{
+//}
 
 UBlueprint*/*UClass**/ EditorRessourceBank::GetBlueprintRessource(/*RessourceBlueprints type*/int32 currentPiece)
 {

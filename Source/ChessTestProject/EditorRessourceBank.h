@@ -11,7 +11,7 @@
 class CHESSTESTPROJECT_API EditorRessourceBank
 {
     EditorRessourceBank();
-    ~EditorRessourceBank();
+    //~EditorRessourceBank();
 
     // i dont want anything to do with copy of any sorts
     EditorRessourceBank(const EditorRessourceBank &) = delete;
